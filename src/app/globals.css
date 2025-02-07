@@ -1,0 +1,32 @@
+@import url('https://fonts.googleapis.com/css2?family=Adamina&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  font-family: 'Adamina', serif;
+  background-color: #f5fbf4; /* Off-White */
+  color: #1e3565; /* Dark Blue */
+}
+
+input {
+  color: black !important;    /* Ensure text inside input fields is black */
+  background-color: white;    /* Make input background white */
+}
+
+canvas {
+  background-color: white !important; /* Ensure signature canvas has a white background */
+}
