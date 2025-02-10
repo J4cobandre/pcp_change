@@ -329,13 +329,34 @@ export default function Home() {
         }),
       })
         .then((res) => res.json())
-        .then((data) => {
+        .then(async (data) => { // Use async/await to handle the faxing
           console.log("✅ PDF Uploaded:", data.pdfUrl);
-          setSubmitted(true);
-          console.log("Form is now submitted")
-        })
-        .catch((error) => console.error("❌ Failed to upload PDF:", error));
   
+          try {
+            // Call the fax API after successful PDF upload
+            const faxResponse = await fetch("/api/send-fax", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ pdfUrl: data.pdfUrl }),
+            });
+            console.log("📠 Fax Response:", await faxResponse.json());
+  
+            if (!faxResponse.ok) {
+              console.error("❌ Fax sending failed");
+            }
+            setSubmitted(true);
+            console.log("Form is now submitted");
+          } catch (faxError) {
+            console.error("❌ Faxing failed:", faxError);
+            alert("Faxing failed, please try again.");
+            setSubmitted(true);
+          }
+        })
+        .catch((error) => {
+          console.error("❌ Failed to upload PDF:", error);
+          alert("Failed to upload the PDF.");
+          setSubmitted(true);
+        });
     } catch (error) {
       console.error("❌ PDF Generation Failed:", error);
       alert("PDF generation failed, please try again.");

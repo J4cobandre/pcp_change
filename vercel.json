@@ -1,0 +1,29 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "src/api/fax_api.py",
+      "use": "@vercel/python",
+      "config": {
+        "includeFiles": [
+          "config/serviceAccountKey.json",
+          "config/rc-credentials.json"
+        ]
+      }
+    },
+    {
+      "src": "package.json",
+      "use": "@vercel/next"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/send-fax",
+      "dest": "src/api/fax_api.py"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/"
+    }
+  ]
+}
