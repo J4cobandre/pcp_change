@@ -11,7 +11,6 @@ export default function Home() {
   const [formData, setFormData] = useState<Record<string, string>>({});
   const [reviewing, setReviewing] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const [pdfPreviewUrl, setPdfPreviewUrl] = useState<string | null>(null);
   const sigCanvas = useRef<SignatureCanvas | null>(null);
 
   useEffect(() => {
@@ -94,21 +93,6 @@ export default function Home() {
     return `${month}/${day}/${year}`; // Format: MM/DD/YYYY
   };
 
-  const uploadPdfToStorage = async (pdfBytes: Uint8Array, fileName: string) => {
-    const storage = getStorage();
-    const storageRef = ref(storage, `pcp_forms/${fileName}`);
-    const pdfBlob = new Blob([pdfBytes], { type: "application/pdf" });
-  
-    try {
-      await uploadBytes(storageRef, pdfBlob);
-      const downloadUrl = await getDownloadURL(storageRef);
-      return downloadUrl;
-    } catch (error) {
-      console.error("❌ PDF Upload Failed:", error);
-      return null;
-    }
-  };
-  
   const fillAndGeneratePDF = async () => {
     try {
       const pdfTemplatePath =
@@ -148,12 +132,11 @@ export default function Home() {
         } else {
           console.warn("⚠ No provider data found in database.");
         }
-      } catch (err) {
-        console.error("❌ Error fetching provider details:", err);
+      } catch (error) {
+        console.error("❌ Error fetching provider details:", error);
       }
       
       // 🔥 Split Provider Name into First & Last Name
-      const providerNameTrimmed = providerData.provider_name.trim();
       const splitProviderName = providerData.provider_name.trim().split(" ");
       const providerFirstName = splitProviderName.length > 1 ? splitProviderName[0] : providerData.provider_name;
       const providerLastName = splitProviderName.length > 1 ? splitProviderName.slice(1).join(" ") : "";
@@ -361,21 +344,6 @@ export default function Home() {
       console.error("❌ PDF Generation Failed:", error);
       alert("PDF generation failed, please try again.");
     }
-  };
-
-  const handleFinalSubmit = async () => {
-    fetch("/api/submit-form", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ insurance, location, ...formData }),
-    })
-      .then(() => {
-        console.log("Submitting the form");
-        setSubmitted(true);
-        console.log("Form is now submitted"); // add this line
-        fillAndGeneratePDF();
-      })
-      .catch(() => alert("Something went wrong!"));
   };
 
   const clearSignature = () => sigCanvas.current?.clear();
