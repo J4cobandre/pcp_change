@@ -1,15 +1,26 @@
 import * as admin from "firebase-admin";
-import fs from "fs";
-import path from "path";
-
-const serviceAccountPath = path.join(process.cwd(), "config", "serviceAccountKey.json");
 
 // ✅ Initialize only if Firebase Admin is not already initialized
 if (!admin.apps.length) {
-  admin.initializeApp({
-    credential: admin.credential.cert(JSON.parse(fs.readFileSync(serviceAccountPath, "utf8"))),
-    storageBucket: "gs://pcpchangepatient.firebasestorage.app",
-  });
+  try {
+    // Parse the service account key from environment variable
+    const serviceAccountKeyStr = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
+    
+    if (!serviceAccountKeyStr) {
+      throw new Error("Firebase service account key is not defined");
+    }
+
+    const serviceAccountKey = JSON.parse(serviceAccountKeyStr);
+
+    admin.initializeApp({
+      credential: admin.credential.cert(serviceAccountKey),
+      storageBucket: "gs://pcpchangepatient.firebasestorage.app",
+    });
+  } catch (error) {
+    console.error("Failed to initialize Firebase Admin:", error);
+    // Optionally, you could throw the error to prevent app startup
+    // throw error;
+  }
 }
 
 export const adminDb = admin.firestore();
